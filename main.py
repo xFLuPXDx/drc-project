@@ -50,4 +50,4 @@ def update(username : str,password : str,new_pass : str):
         if user['username'] == username and user['password'] == password:
             user['password'] = new_pass
             users[i] = user
-        return "update"
+        return "updated"
