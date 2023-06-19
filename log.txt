@@ -1,0 +1,5 @@
+create
+
+http://127.0.0.1:8000/signup?username=arshad1&email=wndwdl&password=arshad123
+http://127.0.0.1:8000/signup?username=arshad2&email=wndwdl&password=arshad123
+http://127.0.0.1:8000/signup?username=arshad3&email=wndwdl&password=arshad123
