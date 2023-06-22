@@ -20,7 +20,6 @@ def home():
 def about(name : str):
     return "This is about {name}"
     
-
 @app.get("/users/")
 def get_users(db: Session = Depends(get_db)):
     users = db.query(models.Users).all()
@@ -28,7 +27,7 @@ def get_users(db: Session = Depends(get_db)):
 
 @app.get('/signup')
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = models.Users(username=user.name, email=user.email , password = user.password)
+    db_user = models.Users(username=user.username, email=user.email , password = user.password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
