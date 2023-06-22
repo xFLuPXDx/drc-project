@@ -1,7 +1,9 @@
-from fastapi import FastAPI,depends
+from fastapi import FastAPI,Depends
 from database import get_db,engine
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 import models
+from schemas import UserCreate
+
 import sqlite3
 
 app = FastAPI()
@@ -16,12 +18,21 @@ def home():
 
 @app.get("/about")
 def about(name : str):
-    return f"This is about {name}"
+    return "This is about {name}"
     
-    
+
+@app.get("/users/")
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(models.Users).all()
+    return users
+
 @app.get('/signup')
-def signup(username : str,email : str ,password : str,db : session depends(get_db)):
-    user=models.Users("username" = username,"email" = email,"password" = password)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = models.Users(username=user.name, email=user.email , password = user.password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
     
 
     
