@@ -33,8 +33,8 @@ def get_users(db: Session = Depends(get_db)):
     return users
 
 @app.post('/signup/')
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = models.Users(username=user.username, email=user.email , password = user.password)
+def create_user(username : str , email : str , password : str , db: Session = Depends(get_db)):
+    db_user = models.Users(username=username, email=email , password = password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -43,10 +43,10 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     
 @app.post('/login')
-def login(user : UserBase,db: Session = Depends(get_db)):
-    db_user = db.query(models.Users).filter(models.Users.username == user.username).first()
+def login(username : str , password : str , db: Session = Depends(get_db)):
+    db_user = db.query(models.Users).filter(models.Users.username == username).first()
     if db_user:
-        if db_user.password == user.password:
+        if db_user.password == password:
             return "Logged In"
         else:
             return "User does not exist"
@@ -61,12 +61,12 @@ def login(user : UserBase,db: Session = Depends(get_db)):
     #         return "User does not exist"
         
 @app.post("/delete")
-def delete(user : UserBase,db: Session = Depends(get_db)):
-    user = db.query(models.Users).filter(models.Users.username == user.username).first()
+def delete(username : str , password : str ,db: Session = Depends(get_db)):
+    user = db.query(models.Users).filter(models.Users.username == username).first()
     if user:
-        pwd = db.query(models.Users).filter(models.Users.password == user.password).first()
+        pwd = db.query(models.Users).filter(models.Users.password == password).first()
         if pwd:
-            db.query(models.Users).filter(models.Users.username == user.username).delete()
+            db.query(models.Users).filter(models.Users.username == username).delete()
             db.commit()
             return "Deleted successfully"
 
@@ -82,12 +82,12 @@ def delete(user : UserBase,db: Session = Depends(get_db)):
     #     return "deleted"
 
 @app.post("/update-password")
-def update(user : UserBase , new_pwd : str , db: Session = Depends(get_db)):
-    user = db.query(models.Users).filter(models.Users.username == user.username).first()
+def update(username : str , password : str  , new_pwd : str , db: Session = Depends(get_db)):
+    user = db.query(models.Users).filter(models.Users.username == username).first()
     if user:
-        pwd = db.query(models.Users).filter(models.Users.password == user.password).first()
+        pwd = db.query(models.Users).filter(models.Users.password == password).first()
         if pwd:
-            update = db.query(models.Users).filter(models.Users.username == user.username).first()
+            update = db.query(models.Users).filter(models.Users.username == username).first()
             update.password = new_pwd
             db.commit()
             return "Updated successfully"
