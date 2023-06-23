@@ -1,10 +1,17 @@
 from fastapi import FastAPI,Depends
-from database import get_db,engine
+from database import SessionLocal,engine
 from sqlalchemy.orm import Session
 import models
-from schemas import UserCreate
+from schemas import UserCreate,UserBase
 
-import sqlite3
+
+def get_db():
+    db=SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 app = FastAPI()
 #create_tables()
@@ -25,7 +32,7 @@ def get_users(db: Session = Depends(get_db)):
     users = db.query(models.Users).all()
     return users
 
-@app.get('/signup')
+@app.post('/signup/')
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = models.Users(username=user.username, email=user.email , password = user.password)
     db.add(db_user)
@@ -35,29 +42,60 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     
 
     
-@app.get('/login')
-def login(username : str,password : str):
-    for user in users:
-        if user["username"]==username:
-            if user["password"]==password:
-                return "Logged in"
+@app.post('/login')
+def login(user : UserBase,db: Session = Depends(get_db)):
+    db_user = db.query(models.Users).filter(models.Users.username == user.username).first()
+    if db_user:
+        if db_user.password == user.password:
+            return "Logged In"
         else:
             return "User does not exist"
-        
-@app.get("/delete")
-def delete(username : str,password : str):
-    for i,user in enumerate(users):
-        if user['username'] == username and user['password'] == password:
-            del users[i]
-            print("***************")
-            print(users)
-            print("***************")
-        return "deleted"
+    else:
+        return "User does not exist"
 
-@app.get("/update-password")
-def update(username : str,password : str,new_pass : str):
-    for i,user in enumerate(users):
-        if user['username'] == username and user['password'] == password:
-            user['password'] = new_pass
-            users[i] = user
-        return "updated"
+    # for user in users:
+    #     if user["username"]==username:
+    #         if user["password"]==password:
+    #             return "Logged in"
+    #     else:
+    #         return "User does not exist"
+        
+@app.post("/delete")
+def delete(user : UserBase,db: Session = Depends(get_db)):
+    user = db.query(models.Users).filter(models.Users.username == user.username).first()
+    if user:
+        pwd = db.query(models.Users).filter(models.Users.password == user.password).first()
+        if pwd:
+            db.query(models.Users).filter(models.Users.username == user.username).delete()
+            db.commit()
+            return "Deleted successfully"
+
+    else:
+        return "Delete unsuccessful"        
+        
+    # for i,user in enumerate(users):
+    #     if user['username'] == username and user['password'] == password:
+    #         del users[i]
+    #         print("***************")
+    #         print(users)
+    #         print("***************")
+    #     return "deleted"
+
+@app.post("/update-password")
+def update(user : UserBase , new_pwd : str , db: Session = Depends(get_db)):
+    user = db.query(models.Users).filter(models.Users.username == user.username).first()
+    if user:
+        pwd = db.query(models.Users).filter(models.Users.password == user.password).first()
+        if pwd:
+            update = db.query(models.Users).filter(models.Users.username == user.username).first()
+            update.password = new_pwd
+            db.commit()
+            return "Updated successfully"
+
+    else:
+        return "Updated unsuccessful"      
+    # for i,user in enumerate(users):
+    #     if user['username'] == username and user['password'] == password:
+    #         user['password'] = new_pass
+    #         users[i] = user
+    #     return "updated"

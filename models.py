@@ -5,8 +5,8 @@ class Users(Base):
     __tablename__ = 'users'
 
     username = Column(String,primary_key=True,nullable = False)
-    password = Column(String,nullable = False)
-    email = Column(String,nullable = False)
+    password = Column(String)
+    email = Column(String)
 
 class Customer(Base):
     __tablename__ = 'customers'
