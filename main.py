@@ -45,13 +45,11 @@ def create_user(username : str , email : str , password : str , db: Session = De
 @app.post('/login')
 def login(username : str , password : str , db: Session = Depends(get_db)):
     db_user = db.query(models.Users).filter(models.Users.username == username).first()
-    if db_user:
-        if db_user.password == password:
-            return "Logged In"
-        else:
-            return "User does not exist"
+    if db_user and  db_user.password == password:
+        return "Logged In"
     else:
         return "User does not exist"
+    
 
     # for user in users:
     #     if user["username"]==username:
@@ -61,15 +59,12 @@ def login(username : str , password : str , db: Session = Depends(get_db)):
     #         return "User does not exist"
         
 @app.post("/delete")
-def delete(username : str , password : str ,db: Session = Depends(get_db)):
+def delete(username : str , pwd : str ,db: Session = Depends(get_db)):
     user = db.query(models.Users).filter(models.Users.username == username).first()
-    if user:
-        pwd = db.query(models.Users).filter(models.Users.password == password).first()
-        if pwd:
-            db.query(models.Users).filter(models.Users.username == username).delete()
-            db.commit()
-            return "Deleted successfully"
-
+    if user and pwd == user.password:
+        db.query(models.Users).filter(models.Users.username == username).delete()
+        db.commit()
+        return "Deleted successfully"
     else:
         return "Delete unsuccessful"        
         
@@ -82,16 +77,13 @@ def delete(username : str , password : str ,db: Session = Depends(get_db)):
     #     return "deleted"
 
 @app.post("/update-password")
-def update(username : str , password : str  , new_pwd : str , db: Session = Depends(get_db)):
+def update(username : str , pwd : str  , new_pwd : str , db: Session = Depends(get_db)):
     user = db.query(models.Users).filter(models.Users.username == username).first()
-    if user:
-        pwd = db.query(models.Users).filter(models.Users.password == password).first()
-        if pwd:
-            update = db.query(models.Users).filter(models.Users.username == username).first()
-            update.password = new_pwd
-            db.commit()
-            return "Updated successfully"
-
+    if user and pwd == user.password:
+        update = db.query(models.Users).filter(models.Users.username == username).first()
+        update.password = new_pwd
+        db.commit()
+        return "Updated successfully"
     else:
         return "Updated unsuccessful"      
     # for i,user in enumerate(users):
