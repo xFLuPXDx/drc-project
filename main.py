@@ -2,7 +2,7 @@ from fastapi import FastAPI,Depends
 from database import SessionLocal,engine
 from sqlalchemy.orm import Session
 import models
-from schemas import UserCreate,UserBase
+import schemas
 
 
 def get_db():
@@ -91,3 +91,39 @@ def update(username : str , pwd : str  , new_pwd : str , db: Session = Depends(g
     #         user['password'] = new_pass
     #         users[i] = user
     #     return "updated"
+
+@app.post("/create-item")
+def create_item(item : schemas.ItemCreate , db: Session = Depends(get_db)):
+    db_item = models.Item(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+@app.post("/order-item")
+def order_item(order : schemas.OrderRequest , db: Session = Depends(get_db)):
+    db_cid = db.query(models.Customer).filter(models.Customer.customer_name == order.customer_name).first()
+    db_iid = db.query(models.Item).filter(models.Item.item_name == order.item_name).first()
+    if db_cid and db_iid:
+        db_order = models.Order(customer_id = db_cid.customer_id , item_id = db_iid.item_id , item_name = db_iid.item_name)
+        db.add(db_order)
+        db.commit()
+        db.refresh(db_order)
+        return db_order
+    
+@app.post("/create-customer")
+def create_customer(customer : schemas.CustomerRequest , db: Session = Depends(get_db)):
+    db_customer = models.Customer(**customer.dict())
+    db.add(db_customer)
+    db.commit()
+    db.refresh(db_customer)
+    return db_customer
+
+@app.get("/order-history")
+def order_history(cid : int,db: Session = Depends(get_db)):
+    db_customer = db.query(models.Customer).filter(models.Customer.customer_id == cid).first()
+    if db_customer:
+        db_order = db.query(models.Order).filter(models.Order.customer_id == cid).all()
+        return db_order
+    else:
+        return "Customer does not exist"

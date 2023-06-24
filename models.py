@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column,String,Integer,ForeignKey
+from sqlalchemy import Column,String,Integer,ForeignKey,Float
 from sqlalchemy.orm import relationship,mapped_column
 class Users(Base):
     __tablename__ = 'users'
@@ -23,17 +23,18 @@ class Item(Base):
 
     item_id = Column(Integer,primary_key=True,autoincrement=True)
     item_name = Column(String,nullable = False)
-    item_price = Column(String,nullable = False)
+    item_price = Column(Float,nullable = False)
    
 
 class Order(Base):
     __tablename__ = 'orders'
 
     order_id = Column(Integer, primary_key=True, autoincrement=True)
-    customer_id = Column(Integer, ForeignKey('customers.customer_id'))
-    item_id = Column(Integer, ForeignKey('items.item_id'))
+    customer_id = mapped_column(Integer, ForeignKey('customers.customer_id'))
+    item_id = mapped_column(Integer, ForeignKey('items.item_id'))
+    item_name = mapped_column(String, ForeignKey('items.item_name'))
 
-    customer = relationship("Customer", backref="orders")
-    item = relationship("Item", backref="orders")
+    # customer = relationship("Customer", backref="orders")
+    # item = relationship("Item", backref="orders")
 
     
